@@ -2,10 +2,6 @@
 
 FROM alpine:latest
 
-# Default to running every 30 minutes
-ENV CRON_SCHEDULE="*/30 * * * *"
-ENV TZ="America/New_York"
-
 
 RUN echo "*** Installing dependencies ***" && \
     apk --no-cache add jq curl bash tzdata file
