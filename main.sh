@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 #
 # Copyright (C) 2023 raph521
-# 
+#
 # This program is free software: you can redistribute it and/or modify it under
 # the terms of the GNU General Public License as published by the Free Software
 # Foundation, either version 3 of the License, or (at your option) any later
 # version.
-# 
+#
 # This program is distributed in the hope that it will be useful, but WITHOUT
 # ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 # FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
@@ -32,16 +32,19 @@ print_datetime () {
 #
 gtn_port_number=$(curl --fail --silent --show-error  ${gtn_addr}/v1/portforward | jq '.port')
 gtn_ip_address=$(curl --fail --silent --show-error ${gtn_addr}/v1/publicip/ip | jq --raw-output '.public_ip')
-if [ ! "$gtn_port_number" ] || [ "$gtn_port_number" = "0" ]; then
+while [ ! "$gtn_port_number" ] || [ "$gtn_port_number" = "0" ]; do
     print_datetime
-    echo "Could not get current forwarded port from gluetun, exiting..."
-    exit 0
-fi
-if [ ! "$gtn_ip_address" ] || [ "$gtn_ip_address" = "" ]; then
+    echo "Could not get current forwarded port from gluetun, retrying in 5..."
+    sleep 5
+    gtn_port_number=$(curl --fail --silent --show-error  ${gtn_addr}/v1/portforward | jq '.port')
+done
+
+while [ ! "$gtn_ip_address" ] || [ "$gtn_ip_address" = "" ]; do
     print_datetime
-    echo "Could not get public IP address from gluetun, exiting..."
-    exit 0
-fi
+    echo "Could not get public IP address from gluetun, retrying in 5..."
+    sleep 5
+    gtn_ip_address=$(curl --fail --silent --show-error ${gtn_addr}/v1/publicip/ip | jq --raw-output '.public_ip')
+done
 
 #
 # Get current settings from AirDC++
